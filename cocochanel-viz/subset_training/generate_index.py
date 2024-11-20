@@ -1,10 +1,17 @@
 import os
+import json
 
 # Path to the directory containing the files
 directory = "cocochanel-viz/subset_training/draw_images/"
+coco_chanel_validation  = 'cocochanel-viz/subset_training/val_data_overfit.json'
+
 parent = 'draw_images'
 # Get the list of all files in the directory
 files = os.listdir(directory)
+#NOTE: Validation Set
+# Open and read the JSON file
+with open(coco_chanel_validation, 'r') as file:
+    data = json.load(file)
 
 # Create the HTML structure
 html_content = """
@@ -49,12 +56,13 @@ html_content = """
 
 for id, file in enumerate(files):
     # Check if it's an image file
+    caption = data[int(file.split('_')[0])]['conversations'][0]['content']
     file = os.path.join(parent, file)
     if file.lower().endswith(('png', 'jpg', 'jpeg', 'gif', 'bmp')):
         html_content += f"""
         <div class="image-container">
             <img src="{file}" alt="{file}">
-            <p>{id}</p>
+            <p>{caption}</p>
         </div>
         """
     else:
