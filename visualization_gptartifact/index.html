@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>QC Dataset Artifact Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .row {
+      display: flex;
+      align-items: flex-start;
+      background: white;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+    }
+
+    .image-box img {
+      max-width: 500px;
+      height: auto;
+      border: 1px solid #aaa;
+      background-color: #fff;
+    }
+
+    .text-box {
+      margin-left: 30px;
+      white-space: pre-wrap;
+      max-width: 600px;
+    }
+
+    .text-box .header {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>QC Dataset Artifact Descriptions</h1>
+
+  <div id="content"></div>
+
+  <script>
+    const totalItems = 150;
+    const folder = "qcdataset_artifacts_descriptionv4";
+    const container = document.getElementById('content');
+
+    function fileExists(url) {
+      return fetch(url, { method: 'HEAD' }).then(res => res.ok);
+    }
+
+    async function renderRows() {
+      for (let i = 0; i < totalItems; i++) {
+        const imgPath = `${folder}/${i}.png`;
+        const txtPath = `${folder}/${i}.txt`;
+
+        const [imgOk, txtOk] = await Promise.all([fileExists(imgPath), fileExists(txtPath)]);
+        if (!imgOk || !txtOk) continue;
+
+        const row = document.createElement('div');
+        row.className = 'row';
+
+        const imgBox = document.createElement('div');
+        imgBox.className = 'image-box';
+        const img = document.createElement('img');
+        img.src = imgPath;
+        img.alt = `Image ${i}`;
+        imgBox.appendChild(img);
+
+        const textBox = document.createElement('div');
+        textBox.className = 'text-box';
+        const header = document.createElement('div');
+        header.className = 'header';
+        header.textContent = '——Answer——:';
+        const body = document.createElement('div');
+        body.textContent = 'Loading...';
+
+        fetch(txtPath)
+          .then(res => res.text())
+          .then(text => body.textContent = text)
+          .catch(() => body.textContent = 'Failed to load description.');
+
+        textBox.appendChild(header);
+        textBox.appendChild(body);
+
+        row.appendChild(imgBox);
+        row.appendChild(textBox);
+        container.appendChild(row);
+      }
+    }
+
+    renderRows();
+  </script>
+
+</body>
+</html>
