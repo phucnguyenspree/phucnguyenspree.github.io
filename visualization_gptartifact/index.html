@@ -10,6 +10,16 @@
       background-color: #f5f5f5;
     }
 
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    select {
+      padding: 6px 10px;
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
     .row {
       display: flex;
       align-items: flex-start;
@@ -42,23 +52,34 @@
 
   <h1>QC Dataset Artifact Descriptions</h1>
 
+  <label for="folderSelect">Choose version:</label>
+  <select id="folderSelect">
+    <option value="qcdataset_artifacts_descriptionv4">Version 4</option>
+    <option value="qcdataset_artifacts_descriptionv5">Version 5</option>
+  </select>
+
   <div id="content"></div>
 
   <script>
-    const totalItems = 150;
-    const folder = "qcdataset_artifacts_descriptionv4";
-    const container = document.getElementById('content');
+    const totalItems = 150; // Max range to check
+    const contentContainer = document.getElementById('content');
+    const folderSelector = document.getElementById('folderSelect');
 
-    function fileExists(url) {
+    async function fileExists(url) {
       return fetch(url, { method: 'HEAD' }).then(res => res.ok);
     }
 
-    async function renderRows() {
+    async function renderFolder(folder) {
+      contentContainer.innerHTML = ''; // Clear current content
+
       for (let i = 0; i < totalItems; i++) {
         const imgPath = `${folder}/${i}.png`;
         const txtPath = `${folder}/${i}.txt`;
 
-        const [imgOk, txtOk] = await Promise.all([fileExists(imgPath), fileExists(txtPath)]);
+        const [imgOk, txtOk] = await Promise.all([
+          fileExists(imgPath),
+          fileExists(txtPath)
+        ]);
         if (!imgOk || !txtOk) continue;
 
         const row = document.createElement('div');
@@ -86,14 +107,18 @@
 
         textBox.appendChild(header);
         textBox.appendChild(body);
-
         row.appendChild(imgBox);
         row.appendChild(textBox);
-        container.appendChild(row);
+        contentContainer.appendChild(row);
       }
     }
 
-    renderRows();
+    folderSelector.addEventListener('change', () => {
+      renderFolder(folderSelector.value);
+    });
+
+    // Initial load
+    renderFolder(folderSelector.value);
   </script>
 
 </body>
